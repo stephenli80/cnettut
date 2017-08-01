@@ -86,7 +86,12 @@ void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
     server.current_client = c;
     readlen = CNETTUT_IOBUF_LEN;
 
-    nread = read(fd, c->querybuf, readlen);
+
+    int oldlen = sdslen(c->querybuf);
+    sdsMakeRoomFor(c->querybuf, readlen);
+
+
+    nread = read(fd, c->querybuf+oldlen, readlen);
     if (nread == -1) {
         if (errno == EAGAIN) {
             nread = 0;
@@ -101,6 +106,7 @@ void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
         return;
     }
     if (nread) {
+
         sdsIncrLen(c->querybuf,nread);
 
     } else {
