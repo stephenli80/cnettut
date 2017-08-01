@@ -10,6 +10,7 @@ set(SOURCE_FILES
         src/zmalloc.c
         src/anet.c
         src/networking.c
+        src/sds.c
         src/cnettut.c src/server.c)
 
 add_executable(cnettut ${SOURCE_FILES})

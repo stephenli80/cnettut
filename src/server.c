@@ -6,9 +6,6 @@
 #include "ae.h"
 #include "anet.h"
 
-/*================================= Globals ================================= */
 
-/* Global vars */
-struct aServer server; /* server global state */
 
 
