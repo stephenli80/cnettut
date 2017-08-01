@@ -46,6 +46,7 @@ struct aServer {
     char *logfile;
     int verbosity;
     int syslog_enabled;
+    int shutdown_asap;
 };
 
 
