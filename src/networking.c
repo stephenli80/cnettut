@@ -95,11 +95,18 @@ aClient *createClient(int fd) {
         anetEnableTcpNoDelay(NULL, fd);
         if (aeCreateFileEvent(server.el, fd, AE_READABLE,
                               readQueryFromClient, c) == AE_ERR) {
+
+            cnettutLog(CNETTUT_WARNING,"fail to create read query from client");
             close(fd);
             zfree(c);
             return NULL;
         }
+    }else{
+        cnettutLog(CNETTUT_WARNING,"why a negtive file desc");
     }
+
+
+    return c;
 }
 
 void freeClient(aClient *c) {
@@ -119,24 +126,34 @@ void freeClient(aClient *c) {
 
 void processInputBuffer(aClient *c) {
     /* Keep processing while there is something in the input buffer */
+
+
+    cnettutLog(CNETTUT_DEBUG,"receive sth");
+    /*
     while (sdslen(c->querybuf)) {
-           //todo,log
 
-        cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
 
-        sdsclear(c->querybuf);
+        //cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
+
+        //sdsclear(c->querybuf);
 
     }
+     */
 }
 
 
 void acceptCommonHandler(int fd, int flags) {
     aClient *c;
     if ((c = createClient(fd)) == NULL) {
-        //todo log
+
+        cnettutLog(CNETTUT_WARNING,"can not create client, to close it");
         close(fd); /* May be already closed, just ignore errors */
         return;
+    }else {
+        cnettutLog(CNETTUT_DEBUG,"create a new client");
     }
+
+    c->fd = fd;
 
     //c->flags |= flags;
 }
@@ -148,8 +165,12 @@ void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
 
     cfd = anetTcpAccept(server.neterr, fd, cip, sizeof(cip), &cport);
     if (cfd == ANET_ERR) {
-        //todo, log
+
+
+        cnettutLog(CNETTUT_WARNING,"can not accept");
         return;
+    }else{
+        cnettutLog(CNETTUT_DEBUG,"accept a client");
     }
 
 
