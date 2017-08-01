@@ -1,20 +1,9 @@
 
 #include "ae.h"
 #include "anet.h"
+#include "server.h"
 
 
-void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
-    int cport, cfd;
-    char cip[NET_IP_STR_LEN];
-    UNUSED(el);
-    UNUSED(mask);
-    UNUSED(privdata);
-
-    while(max--) {
-        cfd = anetTcpAccept(server.neterr, fd, cip, sizeof(cip), &cport);
-        if (cfd == ANET_ERR) {
-
-        }
 
 int main(int argc, char* argv[]){
     aeEventLoop *el = aeCreateEventLoop(10);
