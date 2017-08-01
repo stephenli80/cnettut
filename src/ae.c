@@ -40,9 +40,11 @@
 #include <time.h>
 #include <errno.h>
 
+#include "server.h"
 #include "ae.h"
 #include "zmalloc.h"
 #include "config.h"
+
 
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
@@ -438,10 +440,16 @@ int aeWait(int fd, int mask, long long milliseconds) {
 void aeMain(aeEventLoop *eventLoop) {
     eventLoop->stop = 0;
     while (!eventLoop->stop) {
+
+
+
         if (eventLoop->beforesleep != NULL)
             eventLoop->beforesleep(eventLoop);
         aeProcessEvents(eventLoop, AE_ALL_EVENTS);
     }
+
+
+    cnettutLog(CNETTUT_NOTICE,"finished aemain");
 }
 
 char *aeGetApiName(void) {

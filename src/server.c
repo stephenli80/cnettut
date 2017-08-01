@@ -6,6 +6,7 @@
 #include <syslog.h>
 #include <sys/time.h>
 #include <sys/unistd.h>
+#include <stdlib.h>
 
 #include "server.h"
 #include "ae.h"

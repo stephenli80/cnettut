@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/fcntl.h>
 #include "ae.h"
 #include "anet.h"
 #include "server.h"
@@ -33,10 +34,12 @@ static void sigShutdownHandler(int sig) {
      * the user really wanting to quit ASAP without waiting to persist
      * on disk. */
 
-    close(server.ipfd);
-        cnettutLog(CNETTUT_WARNING, "You insist... exiting now: %s",msg);
+    if(server.ipfd > 0)
+       close(server.ipfd);
 
-   exit(1);
+    cnettutLog(CNETTUT_WARNING, "You insist... exiting now: %s",msg);
+
+   exit(12);
 
 
 }
@@ -65,19 +68,48 @@ void setupSignalHandlers(void) {
 }
 
 
+void daemonize(void) {
+    int fd;
+
+    if (fork() != 0) exit(0); /* parent exits */
+    setsid(); /* create a new session */
+
+    /* Every output goes to /dev/null. If Redis is daemonized but
+     * the 'logfile' is set to 'stdout' in the configuration file
+     * it will not log at all. */
+    if ((fd = open("/dev/null", O_RDWR, 0)) != -1) {
+        dup2(fd, STDIN_FILENO);
+        dup2(fd, STDOUT_FILENO);
+        dup2(fd, STDERR_FILENO);
+        if (fd > STDERR_FILENO) close(fd);
+    }
+}
+
+
 int main(int argc, char* argv[]){
 
     server.port = 8996;
 
-    server.logfile = "cnettut.log";
+    server.logfile = "cnettut1.log";
     server.verbosity = CNETTUT_DEBUG;
 
     server.syslog_enabled =0;
     server.shutdown_asap =1;
 
+    server.ipfd = AE_ERR;
+
+   // signal(SIGHUP, SIG_IGN);
+   // signal(SIGPIPE, SIG_IGN);
+
+    setupSignalHandlers();
+
+    //daemonize();
+
+    cnettutLog(CNETTUT_NOTICE,"begin");
+
     int ipfd = anetTcpServer(server.neterr, server.port, "0.0.0.0", 16);
 
-    cnettutLog(CNETTUT_NOTICE,"bind to port :%s", server.port);
+    cnettutLog(CNETTUT_NOTICE,"bind to port :%d", server.port);
 
     if(ipfd == AE_ERR){
 
