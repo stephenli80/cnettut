@@ -198,6 +198,8 @@ size_t sdsAllocSize(sds s) {
  * sdsIncrLen(s, nread);
  */
 void sdsIncrLen(sds s, int incr) {
+
+    assert(s != NULL);
     struct sdshdr *sh = (void*) (s-(sizeof(struct sdshdr)));
 
     if (incr >= 0)

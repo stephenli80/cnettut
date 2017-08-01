@@ -31,6 +31,7 @@
 #include <sys/unistd.h>
 #include <sys/errno.h>
 #include <math.h>
+#include <string.h>
 
 #include "cnettut.h"
 #include "server.h"
@@ -90,12 +91,12 @@ void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
         if (errno == EAGAIN) {
             nread = 0;
         } else {
-           // redisLog(REDIS_VERBOSE, "Reading from client: %s",strerror(errno));
+            cnettutLog(CNETTUT_NOTICE, "Reading from client: %s",strerror(errno));
             freeClient(c);
             return;
         }
     } else if (nread == 0) {
-        //redisLog(REDIS_VERBOSE, "Client closed connection");
+         cnettutLog(CNETTUT_NOTICE, "Client closed connection");
         freeClient(c);
         return;
     }
@@ -136,6 +137,8 @@ aClient *createClient(int fd) {
         cnettutLog(CNETTUT_WARNING,"why a negtive file desc");
     }
 
+    c->fd=fd;
+    c->querybuf=sdsempty();
 
     return c;
 }
@@ -156,7 +159,7 @@ void acceptCommonHandler(int fd, int flags) {
         cnettutLog(CNETTUT_DEBUG,"create a new client");
     }
 
-    c->fd = fd;
+
 
     //c->flags |= flags;
 }
