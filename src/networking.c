@@ -43,6 +43,37 @@
 
 extern struct aServer server;
 
+void freeClient(aClient *c) {
+
+
+    /* If this is marked as current client unset it */
+    if (server.current_client == c) server.current_client = NULL;
+
+
+
+    /* Free the query buffer */
+    sdsfree(c->querybuf);
+    c->querybuf = NULL;
+
+    zfree(c);
+}
+
+void processInputBuffer(aClient *c) {
+    /* Keep processing while there is something in the input buffer */
+
+
+    cnettutLog(CNETTUT_DEBUG,"receive sth");
+    /*
+    while (sdslen(c->querybuf)) {
+
+
+        //cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
+
+        //sdsclear(c->querybuf);
+
+    }
+     */
+}
 
 void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
     aClient *c = (aClient*) privdata;
@@ -109,37 +140,9 @@ aClient *createClient(int fd) {
     return c;
 }
 
-void freeClient(aClient *c) {
-
-
-    /* If this is marked as current client unset it */
-    if (server.current_client == c) server.current_client = NULL;
 
 
 
-    /* Free the query buffer */
-    sdsfree(c->querybuf);
-    c->querybuf = NULL;
-
-    zfree(c);
-}
-
-void processInputBuffer(aClient *c) {
-    /* Keep processing while there is something in the input buffer */
-
-
-    cnettutLog(CNETTUT_DEBUG,"receive sth");
-    /*
-    while (sdslen(c->querybuf)) {
-
-
-        //cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
-
-        //sdsclear(c->querybuf);
-
-    }
-     */
-}
 
 
 void acceptCommonHandler(int fd, int flags) {
