@@ -41,7 +41,7 @@
 #include "sds.h"
 
 
-
+extern struct aServer server;
 
 
 void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
@@ -121,6 +121,8 @@ void processInputBuffer(aClient *c) {
     /* Keep processing while there is something in the input buffer */
     while (sdslen(c->querybuf)) {
            //todo,log
+
+        cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
 
         sdsclear(c->querybuf);
 
