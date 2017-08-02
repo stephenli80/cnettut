@@ -64,16 +64,16 @@ void processInputBuffer(aClient *c) {
 
 
     cnettutLog(CNETTUT_DEBUG,"receive sth");
-    /*
+
     while (sdslen(c->querybuf)) {
 
 
-        //cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
+        cnettutLog(CNETTUT_DEBUG,"receive %s", c->querybuf);
 
-        //sdsclear(c->querybuf);
+        sdsclear(c->querybuf);
 
     }
-     */
+
 }
 
 void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
