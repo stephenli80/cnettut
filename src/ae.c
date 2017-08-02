@@ -48,7 +48,15 @@
 
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
-#include "ae_select.c"
+
+#ifdef HAVE_EPOLL
+    #include "ae_epoll.c"
+#else
+
+    #include "ae_select.c"
+
+#endif
+
 
 aeEventLoop *aeCreateEventLoop(int setsize) {
     aeEventLoop *eventLoop;
