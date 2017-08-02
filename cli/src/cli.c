@@ -8,6 +8,7 @@
 
 #include "linenoise.h"
 #include "sds.h"
+#include "net.h"
 
 
 static void completionCallback(const char *buf, linenoiseCompletions *lc) {
@@ -49,6 +50,8 @@ static void repl(void) {
 
 int main(int argc, char **argv){
 
+
+    //aClientContextConnectTcp()
     repl();
     return 0;
 }
