@@ -16,14 +16,5 @@ set(SOURCE_FILES
 
 add_executable(cnettut ${SOURCE_FILES})
 
-set(CLI_FILES
 
-        src/config.c
-        src/zmalloc.c
-        src/anet.c
-
-        src/sds.c
-         src/cli.c )
-
-add_executable(cli ${CLI_FILES})
 
