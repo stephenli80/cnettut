@@ -449,7 +449,7 @@ void aeMain(aeEventLoop *eventLoop) {
     }
 
 
-    cnettutLog(CNETTUT_NOTICE,"finished aemain");
+   // cnettutLog(CNETTUT_NOTICE,"finished aemain");
 }
 
 char *aeGetApiName(void) {

@@ -11,6 +11,19 @@ set(SOURCE_FILES
         src/anet.c
         src/networking.c
         src/sds.c
-        src/cnettut.c src/server.c)
+        src/server.c
+        src/cnettut.c )
 
 add_executable(cnettut ${SOURCE_FILES})
+
+set(CLI_FILES
+
+        src/config.c
+        src/zmalloc.c
+        src/anet.c
+
+        src/sds.c
+         src/cli.c )
+
+add_executable(cli ${CLI_FILES})
+
