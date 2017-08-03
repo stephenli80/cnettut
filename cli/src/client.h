@@ -7,6 +7,7 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define REDIS_ERR -1
 #define REDIS_OK 0
@@ -22,7 +23,7 @@
 #define REDIS_ERR_OTHER 2 /* Everything else... */
 
 /* Connection type can be blocking or non-blocking and is set in the
- * least significant bit of the flags field in redisContext. */
+ * least significant bit of the flags field in aClientContext. */
 #define REDIS_BLOCK 0x1
 
 /* Connection may be disconnected before being free'd. The second bit
@@ -61,6 +62,35 @@
 
 
 
+
+/* This is the reply object returned by redisCommand() */
+typedef struct redisReply {
+    int type; /* REDIS_REPLY_* */
+    long long integer; /* The integer when type is REDIS_REPLY_INTEGER */
+    int len; /* Length of string */
+    char *str; /* Used for both REDIS_REPLY_ERROR and REDIS_REPLY_STRING */
+    size_t elements; /* number of elements, for REDIS_REPLY_ARRAY */
+    struct redisReply **element; /* elements vector for REDIS_REPLY_ARRAY */
+} redisReply;
+
+typedef struct redisReadTask {
+    int type;
+    int elements; /* number of elements in multibulk container */
+    int idx; /* index in parent (array) object */
+    void *obj; /* holds user-generated value for a read task */
+    struct redisReadTask *parent; /* parent task */
+    void *privdata; /* user-settable arbitrary field */
+} redisReadTask;
+
+typedef struct redisReplyObjectFunctions {
+    void *(*createString)(const redisReadTask*, char*, size_t);
+    void *(*createArray)(const redisReadTask*, int);
+    void *(*createInteger)(const redisReadTask*, long long);
+    void *(*createNil)(const redisReadTask*);
+    void (*freeObject)(void*);
+} redisReplyObjectFunctions;
+
+
 /* State for the protocol parser */
 typedef struct aClientReader {
     int err; /* Error flags, 0 when there is no error */
@@ -71,15 +101,22 @@ typedef struct aClientReader {
     size_t len; /* Buffer length */
     size_t maxbuf; /* Max length of unused buffer */
 
-   // redisReadTask rstack[9];
+    redisReadTask rstack[9];
     int ridx; /* Index of current read task */
     void *reply; /* Temporary reply pointer */
 
-   // redisReplyObjectFunctions *fn;
+    redisReplyObjectFunctions *fn;
     void *privdata;
 } aClientReader;
 
 
+/* Function to free the reply objects hiredis returns by default. */
+void freeReplyObject(void *reply);
+
+/* Functions to format a command according to the protocol. */
+int redisvFormatCommand(char **target, const char *format, va_list ap);
+int redisFormatCommand(char **target, const char *format, ...);
+int redisFormatCommandArgv(char **target, int argc, const char **argv, const size_t *argvlen);
 
 /* Context for a connection to Redis */
 typedef struct aClientContext {
@@ -91,5 +128,29 @@ typedef struct aClientContext {
     aClientReader *reader; /* Protocol reader */
 } aClientContext;
 
+
+
+
+aClientContext *redisConnect(const char *ip, int port);
+aClientContext *redisConnectWithTimeout(const char *ip, int port, const struct timeval tv);
+aClientContext *redisConnectNonBlock(const char *ip, int port);
+aClientContext *redisConnectBindNonBlock(const char *ip, int port, const char *source_addr);
+aClientContext *redisConnectUnix(const char *path);
+aClientContext *redisConnectUnixWithTimeout(const char *path, const struct timeval tv);
+aClientContext *redisConnectUnixNonBlock(const char *path);
+aClientContext *redisConnectFd(int fd);
+int redisSetTimeout(aClientContext *c, const struct timeval tv);
+int redisEnableKeepAlive(aClientContext *c);
+void redisFree(aClientContext *c);
+int redisFreeKeepFd(aClientContext *c);
+int redisBufferRead(aClientContext *c);
+int redisBufferWrite(aClientContext *c, int *done);
+
+/* In a blocking context, this function first checks if there are unconsumed
+ * replies to return and returns one if so. Otherwise, it flushes the output
+ * buffer to the socket and reads until it has a reply. In a non-blocking
+ * context, it will return unconsumed replies until there are no more. */
+int redisGetReply(aClientContext *c, void **reply);
+int redisGetReplyFromReader(aClientContext *c, void **reply);
 
 #endif //CLI_CLIENT_H_H
